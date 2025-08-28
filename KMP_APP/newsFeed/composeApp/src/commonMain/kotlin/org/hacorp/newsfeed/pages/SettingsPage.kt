@@ -45,17 +45,19 @@ import org.hacorp.newsfeed.model.ThemeStore
 @Composable
 fun SettingsPage(
     themeStore: ThemeStore,
-    navigationStore: NavigationComponent
+    navigationStore: NavigationComponent,
+    modifier: Modifier = Modifier
 ) {
     val themeState by themeStore.state.collectAsState()
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text("Settings") },
                 navigationIcon = {
                     IconButton(onClick = {
-                        navigationStore.navigateToSettings()
+                        navigationStore.navigateBack()
                     }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }

@@ -42,25 +42,33 @@ fun MainContent(
     val themeState: ThemeState by themeStore.state.collectAsState()
 
     // Handle authentication state changes
-//    LaunchedEffect(authState) {
-//        when (authState) {
-//            is AuthState.Authenticated -> {
-//                val currentChild = stack.active.instance
-//                if (currentChild is NavigationComponent.Child.Login || currentChild is NavigationComponent.Child.Splash) {
-//                    navigationComponent.navigateToNewsList()
-//                }
-//            }
-//            is AuthState.NotAuthenticated -> {
-//                val currentChild = stack.active.instance
-//                if (currentChild !is NavigationComponent.Child.Login && currentChild !is NavigationComponent.Child.Splash) {
-//                    navigationComponent.navigateToLogin()
-//                }
-//            }
-//            else -> {
-//                navigationComponent.navigateToNewsList()
-//                /* Handle other states if needed */ }
-//        }
-//    }
+    LaunchedEffect(authState) {
+        try {
+            when (authState) {
+                is AuthState.Authenticated -> {
+                    val currentChild = stack.active.instance
+                    if (currentChild is NavigationComponent.Child.Login || currentChild is NavigationComponent.Child.Splash) {
+                        navigationComponent.navigateToNewsList()
+                    }
+                }
+                is AuthState.NotAuthenticated -> {
+                    val currentChild = stack.active.instance
+                    if (currentChild !is NavigationComponent.Child.Login ) {
+                        navigationComponent.navigateToLogin()
+                    }
+                }
+                is AuthState.Loading -> {
+                    // Keep current state during loading
+                }
+                else -> {
+                    navigationComponent.navigateToNewsList()
+                }
+            }
+        } catch (e: Exception) {
+            // Handle navigation errors gracefully
+            println("Navigation error: ${e.message}")
+        }
+    }
 
     NewsFeedTheme(themeState = themeState) {
         when (val child = stack.active.instance) {
@@ -103,7 +111,8 @@ fun MainContent(
                                 NewsDetailPage(
                                     articleId = child.articleId,
                                     newsStore = newsStore,
-                                    navigationStore = navigationComponent
+                                    navigationStore = navigationComponent,
+                                    modifier = Modifier.padding(paddingValues)
                                 )
                             }
                             is NavigationComponent.Child.Profile -> {
@@ -116,7 +125,8 @@ fun MainContent(
                             is NavigationComponent.Child.Settings -> {
                                 SettingsPage(
                                     themeStore = themeStore,
-                                    navigationStore = navigationComponent
+                                    navigationStore = navigationComponent,
+                                    modifier = Modifier.padding(paddingValues)
                                 )
                             }
                             else -> {

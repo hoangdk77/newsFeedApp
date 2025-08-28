@@ -53,7 +53,7 @@ fun BottomNavigationBar(
         items.forEach { item ->
             val isSelected = when (currentChild) {
                 is NavigationComponent.Child.NewsList -> item.label == "News"
-                is NavigationComponent.Child.NewsDetail -> item.label == "News"
+//                is NavigationComponent.Child.NewsDetail -> item.label == "News"
                 is NavigationComponent.Child.Profile -> item.label == "Profile"
                 is NavigationComponent.Child.Settings -> item.label == "Settings"
                 else -> false

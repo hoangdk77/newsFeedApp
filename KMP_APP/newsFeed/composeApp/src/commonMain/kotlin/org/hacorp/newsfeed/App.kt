@@ -29,20 +29,18 @@ fun App() {
 
     val transition = newSplashTransition()
 
-    NewsFeedTheme(themeState = ThemeState(useDarkTheme = DarkThemeState.SYSTEM)) {
-        Box(modifier = Modifier.safeContentPadding()) {
-            SplashPage(
-                modifier = Modifier.alpha(transition.splashAlpha)
-            )
+    Box(modifier = Modifier.safeContentPadding()) {
+        SplashPage(
+            modifier = Modifier.alpha(transition.splashAlpha)
+        )
 
-            MainContent(
-                modifier = Modifier.alpha(transition.contentAlpha),
-                topPadding = transition.contentTopPadding,
-                navigationComponent = navigationComponent,
-                authStore = authStore,
-                newsStore = newsStore,
-                themeStore = themeStore
-            )
-        }
+        MainContent(
+            modifier = Modifier.alpha(transition.contentAlpha),
+            topPadding = transition.contentTopPadding,
+            navigationComponent = navigationComponent,
+            authStore = authStore,
+            newsStore = newsStore,
+            themeStore = themeStore
+        )
     }
 }

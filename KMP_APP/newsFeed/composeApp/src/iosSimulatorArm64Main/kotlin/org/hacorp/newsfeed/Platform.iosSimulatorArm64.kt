@@ -1,5 +1,1 @@
-package org.hacorp.newsfeed
-
-actual fun getPlatform(): org.hacorp.newsfeed.Platform {
-    TODO("Not yet implemented")
-}
+// This file can be deleted - iosMain provides the implementation

@@ -9,9 +9,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.composeCompiler)
-    id("co.touchlab.faktory.kmmbridge") version "0.3.7"
-    kotlin("native.cocoapods")
-    id("maven-publish")
+    alias(libs.plugins.kotlinCocoapods)
 }
 
 // Add repositories for dependency resolution
@@ -30,9 +28,31 @@ kotlin {
     }
 
     // --- iOS ---
+    // These define the compilation targets for Kotlin/Native for iOS.
+    // Even without CocoaPods, you might want to compile Kotlin code for these
+    // architectures if you plan to use it in an iOS app through other means
+    // (e.g., manual integration, or if another tool consumes these artifacts).
+    // If you are *only* building the Android app and WasmJS app from this KMP module,
+    // and have no plans to run any Kotlin code on an iOS device/simulator *at all*
+    // from this module, you could remove these. But typically, you'd keep them
+    // if "building for iOS" still means compiling Kotlin for iOS.
     iosX64()
     iosArm64()
     iosSimulatorArm64()
+
+    // --- Cocoapods ---
+    cocoapods {
+        name = "ComposeApp"
+        version = "1.0.0"
+        summary = "KMP shared module with Compose Multiplatform"
+        homepage = "https://github.com/your-org/your-repo"
+        ios.deploymentTarget = "14.1"
+        podfile = project.file("../iosApp/Podfile")
+        framework {
+            baseName = "ComposeApp"
+            isStatic = true
+        }
+    }
 
     // --- WASM / JS ---
     @OptIn(ExperimentalWasmDsl::class)
@@ -42,11 +62,15 @@ kotlin {
             commonWebpackConfig {
                 sourceMaps = true
                 outputFileName = "composeApp.js"
-                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-                    static = (static ?: mutableListOf()).apply {
-                        add(project.rootDir.path)
-                        add(project.projectDir.path)
-                    }
+//                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
+//                    val staticPaths: ListProperty<String> = project.objects.listProperty(String::class.java)
+//                    staticPaths.set(listOf(project.rootDir.path, project.projectDir.path))
+//                    static = staticPaths.get()
+//                }
+            }
+            testTask {
+                useKarma {
+                    useSafari()
                 }
             }
         }
@@ -67,8 +91,6 @@ kotlin {
                 // AndroidX Compose (platform-agnostic)
                 implementation(libs.androidx.lifecycle.viewmodelCompose)
                 implementation(libs.androidx.lifecycle.runtimeCompose)
-//                implementation(libs.jetbrains.androidx.core)
-                implementation(libs.jetbrains.androidx.core.bundle)
 
                 // Navigation (Decompose for all platforms)
                 implementation(libs.decompose)
@@ -113,19 +135,9 @@ kotlin {
         }
 
         val iosMain by creating {
-            dependsOn(commonMain)
             dependencies {
                 implementation(libs.ktor.client.darwin)
             }
-        }
-
-        // Link iOS targets to iosMain
-        val iosX64Main by getting
-        val iosArm64Main by getting
-        val iosSimulatorArm64Main by getting
-
-        configure(listOf(iosX64Main, iosArm64Main, iosSimulatorArm64Main)) {
-            dependsOn(iosMain)
         }
 
         val wasmJsMain by getting {
@@ -133,19 +145,6 @@ kotlin {
                 implementation(libs.ktor.client.js)
                 implementation(libs.koin.core.wasm.js)
             }
-        }
-    }
-
-    // --- Cocoapods ---
-    cocoapods {
-        version = "1.0.0"
-        summary = "KMP shared module with Compose Multiplatform"
-        homepage = "https://github.com/your-org/your-repo"
-        ios.deploymentTarget = "14.1"
-        podfile = project.file("../iosApp/Podfile")
-        framework {
-            baseName = "ComposeApp"
-            isStatic = true
         }
     }
 }
@@ -179,10 +178,10 @@ dependencies {
 }
 
 // --- Extra Tasks ---
-tasks.register<Sync>("packageForXcode") {
-    group = "build"
-    val mode = System.getenv("CONFIGURATION") ?: "DEBUG"
-    dependsOn("assembleXCFramework")
-    from(layout.buildDirectory.dir("bin"))
-    into(layout.buildDirectory.dir("xcode-frameworks/$mode"))
-}
+//tasks.register<Sync>("packageForXcode") {
+//    group = "build"
+//    val mode = System.getenv("CONFIGURATION") ?: "DEBUG"
+//    dependsOn("assembleXCFramework")
+//    from(layout.buildDirectory.dir("XCFrameworks/$mode/ComposeApp.xcframework"))
+//    into(layout.buildDirectory.dir("xcode-frameworks/$mode"))
+//}

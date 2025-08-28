@@ -50,7 +50,8 @@ import org.hacorp.newsfeed.model.NewsStore
 fun NewsDetailPage(
     articleId: String,
     newsStore: NewsStore,
-    navigationStore: NavigationComponent
+    navigationStore: NavigationComponent,
+    modifier: Modifier = Modifier
 ) {
     val newsState by newsStore.state.collectAsState()
 
@@ -59,6 +60,7 @@ fun NewsDetailPage(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text("Article Details") },
